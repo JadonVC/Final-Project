@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status, Response
+from fastapi import HTTPException, status, Response, Depends
 from ..models import orders as model
 from sqlalchemy.exc import SQLAlchemyError
 import uuid
@@ -14,24 +14,23 @@ def create(db: Session, request):
         customer_name=request.customer_name,
         phone=request.phone,
         address=request.address,
+        order_date=datetime.now(),  # Auto-generate current time
         order_type=request.order_type,
-        description=request.description,
-        tracking_number=tracking_number,
-        status="received",
-        payment_status="pending",
+        status="received",  # Default status
         total_amount=0.00,  # Will be calculated when order details are added
-        promo_code_id=getattr(request, 'promo_code_id', None)
+        tracking_number=tracking_number,  # Auto-generate unique tracking number
+        payment_status="pending",  # Default payment status
+        description=request.description
+        # promo_code_id will be None by default (no promo code)
     )
 
     try:
         db.add(new_item)
         db.commit()
         db.refresh(new_item)
-    except SQLAlchemyError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A database error occurred during order creation."
-        )
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
 
     return new_item
 
