@@ -1,7 +1,5 @@
-from . import orders, order_details, recipes, sandwiches, resources
-
+from . import orders, order_details, recipes, sandwiches, resources, reviews, promocodes
 from ..dependencies.database import engine
-
 
 def index():
     orders.Base.metadata.create_all(engine)
@@ -9,3 +7,5 @@ def index():
     recipes.Base.metadata.create_all(engine)
     sandwiches.Base.metadata.create_all(engine)
     resources.Base.metadata.create_all(engine)
+    reviews.Base.metadata.create_all(engine)          # NEW
+    promocodes.Base.metadata.create_all(engine)       # NEW
